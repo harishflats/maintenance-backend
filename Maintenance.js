@@ -11,7 +11,18 @@ const MaintenanceSchema = new mongoose.Schema({
     month: { type: Number, required: true },
     amountPerPerson: { type: Number, default: 0 },
     paidMembers: { type: Number, default: 0 },
-    expenses: [ExpenseItemSchema]
+    expenses: [ExpenseItemSchema],
+    comments: { type: String, default: '' }
+});
+
+// Ensure comments is always returned, even for older records
+MaintenanceSchema.set('toJSON', {
+    transform: (doc, ret) => {
+        if (ret.comments == null) {
+            ret.comments = '';
+        }
+        return ret;
+    }
 });
 
 // Ensure year and month combination is unique for the update-instead-of-add logic

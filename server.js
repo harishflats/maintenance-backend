@@ -56,14 +56,14 @@ app.get('/api/maintenance/:id', async (req, res) => {
 
 // Create a new maintenance record
 app.post('/api/maintenance', async (req, res) => {
-  const { year, month, amountPerPerson, paidMembers, expenses } = req.body;
+  const { year, month, amountPerPerson, paidMembers, expenses, comments } = req.body;
   console.log(`[NEW VERSION] Attempting to save data for ${month}/${year}`);
 
   try {
     // upsert: true will create a new record if it doesn't exist,
     // or update the existing one matching the year and month.
     const filter = { year, month };
-    const update = { amountPerPerson, paidMembers, expenses };
+    const update = { amountPerPerson, paidMembers, expenses, comments };
     const options = { new: true, upsert: true, setDefaultsOnInsert: true };
 
     const savedRecord = await Maintenance.findOneAndUpdate(filter, update, options);
