@@ -14,14 +14,9 @@ app.use(express.json());
 // Test MongoDB connection
 app.get('/api/test-db', async (req, res) => {
   try {
-    // Simple test to check if we can access the database
-    const db = mongoose.connection.db;
-    const collections = await db.listCollections().toArray();
-    res.json({ 
-      message: 'MongoDB connection test successful',
-      database: db.databaseName,
-      collections: collections.map(c => c.name)
-    });
+    // Fetch the first record from the Maintenance collection
+    const firstRecord = await Maintenance.findOne();
+    res.json(firstRecord || {});
   } catch (error) {
     console.error('Database test error:', error);
     res.status(500).json({ error: 'Database connection test failed', details: error.message });
