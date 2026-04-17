@@ -29,15 +29,48 @@ app.get('/api/test-db', async (req, res) => {
 });
 
 // Get all maintenance records
-app.get('/api/maintenance', async (req, res) => {
+// app.get('/api/maintenance', async (req, res) => {
+//   try {
+//     console.log('Fetching maintenance records...');
+//     const maintenance = await Maintenance.find().sort({ createdAt: -1 });
+//     console.log('Found records:', maintenance.length);
+//     res.json(maintenance);
+//   } catch (error) {
+//     console.error('Error fetching maintenance records:', error);
+//     res.status(500).json({ error: 'Failed to fetch maintenance records' });
+//   }
+// });
+
+// Get overall balance
+app.get('/api/maintenance/overall-balance', async (req, res) => {
   try {
-    console.log('Fetching maintenance records...');
-    const maintenance = await Maintenance.find().sort({ createdAt: -1 });
-    console.log('Found records:', maintenance.length);
-    res.json(maintenance);
+    const balanceData = await Maintenance.aggregate([
+      {
+        $project: {
+          monthlyCollected: { $multiply: ['$amountPerPerson', '$paidMembers'] },
+          monthlyExpenses: { $sum: '$expenses.amount' }
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          overallBalance: {
+            $sum: { $subtract: ['$monthlyCollected', '$monthlyExpenses'] }
+          }
+        }
+      }
+    ]);
+
+    if (balanceData.length === 0) {
+      return res.json({});
+    }
+
+    // Remove the _id from the response and send the calculated totals
+    const { _id, ...result } = balanceData[0];
+    res.json(result);
   } catch (error) {
-    console.error('Error fetching maintenance records:', error);
-    res.status(500).json({ error: 'Failed to fetch maintenance records' });
+    console.error('Error calculating overall balance:', error);
+    res.status(500).json({ error: 'Failed to calculate overall balance' });
   }
 });
 
@@ -50,6 +83,27 @@ app.get('/api/maintenance/:id', async (req, res) => {
     }
     res.json(maintenance);
   } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch maintenance record' });
+  }
+});
+
+// Get a specific maintenance record by year and month
+app.get('/api/maintenance/:year/:month', async (req, res) => {
+  try {
+    const year = parseInt(req.params.year, 10);
+    const month = parseInt(req.params.month, 10);
+
+    if (isNaN(year) || isNaN(month)) {
+      return res.status(400).json({ error: 'Invalid year or month parameters' });
+    }
+
+    const maintenance = await Maintenance.findOne({ year, month });
+    if (!maintenance) {
+      return res.json({});
+    }
+    res.json(maintenance);
+  } catch (error) {
+    console.error(`Error fetching maintenance record for ${req.params.year}/${req.params.month}:`, error);
     res.status(500).json({ error: 'Failed to fetch maintenance record' });
   }
 });
