@@ -24,17 +24,17 @@ app.get('/api/test-db', async (req, res) => {
 });
 
 // Get all maintenance records
-// app.get('/api/maintenance', async (req, res) => {
-//   try {
-//     console.log('Fetching maintenance records...');
-//     const maintenance = await Maintenance.find().sort({ createdAt: -1 });
-//     console.log('Found records:', maintenance.length);
-//     res.json(maintenance);
-//   } catch (error) {
-//     console.error('Error fetching maintenance records:', error);
-//     res.status(500).json({ error: 'Failed to fetch maintenance records' });
-//   }
-// });
+app.get('/api/maintenance', async (req, res) => {
+  try {
+    console.log('Fetching maintenance records...');
+    const maintenance = await Maintenance.find().sort({ createdAt: -1 });
+    console.log('Found records:', maintenance.length);
+    res.json(maintenance);
+  } catch (error) {
+    console.error('Error fetching maintenance records:', error);
+    res.status(500).json({ error: 'Failed to fetch maintenance records' });
+  }
+});
 
 // Get overall balance
 app.get('/api/maintenance/overall-balance', async (req, res) => {
