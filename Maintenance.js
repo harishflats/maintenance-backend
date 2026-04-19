@@ -6,13 +6,19 @@ const ExpenseItemSchema = new mongoose.Schema({
     amount: Number
 });
 
+const UploadedFileSchema = new mongoose.Schema({
+    name: String,
+    url: String
+});
+
 const MaintenanceSchema = new mongoose.Schema({
     year: { type: Number, required: true },
     month: { type: Number, required: true },
     amountPerPerson: { type: Number, default: 0 },
     paidMembers: { type: Number, default: 0 },
     expenses: [ExpenseItemSchema],
-    comments: { type: String, default: '' }
+    comments: { type: String, default: '' },
+    uploadedFiles: [UploadedFileSchema]
 });
 
 // Ensure comments is always returned, even for older records
